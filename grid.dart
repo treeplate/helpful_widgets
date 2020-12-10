@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class GridDrawer extends StatelessWidget {
   GridDrawer(this.grid, this.width);
   final List<GridCell> grid;
@@ -23,11 +25,11 @@ class GridPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter _) => true;
   void paint(Canvas canvas, Size size) {
     //print("PNT");
-    double cell_size = 10;
-    Size cellSize = Size(size, size);
+    double cellDim = 10;
+    Size cellSize = Size(cellDim, cellDim);
     for (int y = 0; y < height; y += 1) {
       for (int x = 0; x < width; x += 1) {
-        grid[x + (y * width)].paint(canvas, cellSize, Size(x * cell_size, y * cell_size));
+        grid[x + (y * width)].paint(canvas, cellSize, Offset(x * cellDim, y * cellDim));
       }
     }
   }
