@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class GridDrawer extends StatelessWidget {
-  GridDrawer(this.grid, this.width);
+  const GridDrawer(this.grid, this.width, {Key? key}) : super(key: key);
   final List<GridCell> grid;
   final int width;
   int get height => grid.length ~/ width;
+  @override
   Widget build(BuildContext context) {
-    //print("DRW");
     return CustomPaint(
       painter: GridPainter(
         width,
@@ -22,9 +22,10 @@ class GridPainter extends CustomPainter {
   final int width;
   final int height;
   final List<GridCell> grid;
-  bool shouldRepaint(CustomPainter _) => true;
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
+  @override
   void paint(Canvas canvas, Size size) {
-    //print("PNT");
     double cellDim = 10;
     Size cellSize = Size(cellDim, cellDim);
     for (int y = 0; y < height; y += 1) {
