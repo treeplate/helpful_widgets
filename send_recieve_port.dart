@@ -1,9 +1,11 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'dart:isolate';
+
 List<String> logs = [];
 void log(String name, String msg) {
-  if(!name.startsWith("SRPW")) {
-    print("$name: $msg");
-  }
-  if(logs.contains(name)) {
+  if (logs.contains(name)) {
     File("$name.log").writeAsStringSync(msg + "\n", mode: FileMode.append);
   } else {
     logs.add(name);
@@ -13,7 +15,7 @@ void log(String name, String msg) {
 
 class SRPWrapper {
   SRPWrapper.raw(this.sps, this.name, [ReceivePort? _rp]) {
-    if(_rp != null) rp = _rp;
+    if (_rp != null) rp = _rp;
   }
   factory SRPWrapper(ReceivePort rp, String name) {
     return SRPWrapper.raw([], name, rp);
@@ -31,9 +33,9 @@ class SRPWrapper {
   List<Object?> sent = [];
   set rp(ReceivePort x) {
     x.listen((x) {
-      if(x.value is SendPort) {
+      if (x.value is SendPort) {
         sps.add(x.value);
-        for(Object? thingToSend in sent) {
+        for (Object? thingToSend in sent) {
           x.value.send(MapEntry(name, thingToSend));
         }
         return;
@@ -44,21 +46,24 @@ class SRPWrapper {
       moreItems = Completer();
     });
   }
+
   void send(Object? thingToSend) {
     log("SRPW-$name", "Sending $thingToSend");
     sent.add(thingToSend);
-    for(SendPort sp in sps) {
+    for (SendPort sp in sps) {
       sp.send(MapEntry(name, thingToSend));
     }
   }
+
   Future<T> readItem<T>() async {
-    if(items.isEmpty) await moreItems.future;
+    if (items.isEmpty) await moreItems.future;
     MapEntry result = items.first;
     items.removeAt(0);
-    if(result.value is T) {
+    if (result.value is T) {
       return result.value;
     } else {
-      throw FormatException("SRPW-$name: Expected a $T, got $result (which is a ${result.runtimeType})");
+      throw FormatException(
+          "SRPW-$name: Expected a $T, got $result (which is a ${result.runtimeType})");
     }
-  }  
+  }
 }
