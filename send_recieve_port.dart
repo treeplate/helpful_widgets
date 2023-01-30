@@ -13,28 +13,35 @@ void log(String name, String msg) {
   }
 }
 
+/// Class for making between-isolate communication easier.
 class SRPWrapper {
-  SRPWrapper.raw(this.sps, this.name, [ReceivePort? _rp]) {
+  /// Internal constructor.
+  SRPWrapper.raw(this.sp, this.name, [ReceivePort? _rp]) {
     if (_rp != null) rp = _rp;
   }
+
+  /// For creator of isolate. Make a recieve port, give the isolate the send port, and give this constructor the recieve port. This class is expecting a send port to be sent to the receive port.
   factory SRPWrapper(ReceivePort rp, String name) {
-    return SRPWrapper.raw([], name, rp);
+    return SRPWrapper.raw(null, name, rp);
   }
+
+  /// For created isolate. Pass this constructor the send port you were given at the start. This class will send the creator a send port.
   factory SRPWrapper.fromSendPort(SendPort sp, String name) {
     ReceivePort rp = ReceivePort();
-    SRPWrapper result = SRPWrapper.raw([sp], name, rp);
+    SRPWrapper result = SRPWrapper.raw(sp, name, rp);
     result.send(rp.sendPort);
     return result;
   }
-  List<SendPort> sps = [];
+
+  SendPort? sp;
   final String name;
   Completer<void> moreItems = Completer();
   List<MapEntry> items = [];
   List<Object?> sent = [];
   set rp(ReceivePort x) {
     x.listen((x) {
-      if (x.value is SendPort) {
-        sps.add(x.value);
+      if (x.value is SendPort && sp == null) {
+        sp = x.value;
         for (Object? thingToSend in sent) {
           x.value.send(MapEntry(name, thingToSend));
         }
@@ -47,14 +54,16 @@ class SRPWrapper {
     });
   }
 
+  /// Sends [thingToSend] to the connected isolate, if there is one.
   void send(Object? thingToSend) {
     log("SRPW-$name", "Sending $thingToSend");
     sent.add(thingToSend);
-    for (SendPort sp in sps) {
-      sp.send(MapEntry(name, thingToSend));
+    if (sp != null) {
+      sp!.send(MapEntry(name, thingToSend));
     }
   }
 
+  // Waits for an item to be recieved, makes sure it's of type T, and returns it.
   Future<T> readItem<T>() async {
     if (items.isEmpty) await moreItems.future;
     MapEntry result = items.first;
