@@ -21,3 +21,4 @@ class BoilerplateDialog extends StatelessWidget {
       ),
     );
   }
+}
