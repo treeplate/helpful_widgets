@@ -1,9 +1,8 @@
 class BoilerplateDialog extends StatelessWidget {
-  final String title;
-  final List<Widget> children;
-
   const BoilerplateDialog(
       {super.key, required this.title, required this.children});
+  final String title;
+  final List<Widget> children;
   @override
   Widget build(BuildContext context) {
     return Dialog(
