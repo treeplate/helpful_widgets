@@ -14,7 +14,7 @@ const String noCommits = 'No commits yet';
 
 void main() {
   const bool logNoGitRepo = false;
-  Directory dir = Directory('/Users/elih/dev');
+  Directory dir = Directory(<directory>);
   for (FileSystemEntity file in dir.listSync()) {
     // ignore: dead_code
     if (file is File && logNoGitRepo) {
